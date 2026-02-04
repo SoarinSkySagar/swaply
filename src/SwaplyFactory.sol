@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {IUniswapV2Factory} from "./interfaces/Iv2Factory.sol";
-import {UniswapV2Pair} from "./v2Pair.sol";
-import {IUniswapV2Pair} from "./interfaces/Iv2Pair.sol";
+import {ISwaplyFactory} from "./interfaces/ISwaplyFactory.sol";
+import {SwaplyPair} from "./SwaplyPair.sol";
+import {ISwaplyPair} from "./interfaces/ISwaplyPair.sol";
 
-contract UniswapV2Factory is IUniswapV2Factory {
+contract SwaplyFactory is ISwaplyFactory {
     address public feeTo;
     address public feeToSetter;
 
@@ -29,7 +29,7 @@ contract UniswapV2Factory is IUniswapV2Factory {
         require(token0 != address(0), "UniswapV2: ZERO ADDRESS");
         require(getPair[token0][token1] == address(0), "UniswapV2: PAIR EXISTS");
 
-        bytes memory bytecode = type(UniswapV2Pair).creationCode;
+        bytes memory bytecode = type(SwaplyPair).creationCode;
         bytes32 salt;
         assembly {
             let ptr := mload(0x40)
@@ -39,7 +39,7 @@ contract UniswapV2Factory is IUniswapV2Factory {
             pair := create2(0, add(bytecode, 32), mload(bytecode), salt)
         }
 
-        IUniswapV2Pair(pair).initialize(token0, token1);
+        ISwaplyPair(pair).initialize(token0, token1);
         getPair[token0][token1] = pair;
         getPair[token1][token0] = pair;
         allPairs.push(pair);

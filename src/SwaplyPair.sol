@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.3;
 
-import {IUniswapV2Pair} from "./interfaces/Iv2Pair.sol";
-import {IUniswapV2Factory} from "./interfaces/Iv2Factory.sol";
-import {IUniswapV2Callee} from "./interfaces/Iv2Callee.sol";
-import {UniswapV2ERC20} from "./v2ERC20.sol";
+import {ISwaplyPair} from "./interfaces/ISwaplyPair.sol";
+import {ISwaplyFactory} from "./interfaces/ISwaplyFactory.sol";
+import {ISwaplyCallee} from "./interfaces/ISwaplyCallee.sol";
+import {SwaplyERC20} from "./SwaplyERC20.sol";
 import {IERC20} from "@openzeppelin-contracts-4.7.3/token/ERC20/IERC20.sol";
 import {ReentrancyGuard} from "@openzeppelin-contracts-4.7.3/security/ReentrancyGuard.sol";
 import {Math} from "./utils/math.sol";
 import {UQ112x112} from "./utils/uq112x112.sol";
 
-contract UniswapV2Pair is IUniswapV2Pair, UniswapV2ERC20, ReentrancyGuard {
+contract SwaplyPair is ISwaplyPair, SwaplyERC20, ReentrancyGuard {
     uint256 public constant MINIMUM_LIQUIDITY = 10 ** 3;
     bytes4 private constant SELECTOR = bytes4(keccak256(bytes("transfer(address,uint256)")));
 
@@ -59,7 +59,7 @@ contract UniswapV2Pair is IUniswapV2Pair, UniswapV2ERC20, ReentrancyGuard {
         _blockTimestampLast = blockTimestampLast;
     }
 
-    function mint(address to) external override returns (uint256 liquidity) {
+    function mint(address to) external override nonReentrant returns (uint256 liquidity) {
         (uint112 _reserve0, uint112 _reserve1,) = getReserves();
         uint256 balance0 = IERC20(token0).balanceOf(address(this));
         uint256 balance1 = IERC20(token1).balanceOf(address(this));
@@ -85,7 +85,7 @@ contract UniswapV2Pair is IUniswapV2Pair, UniswapV2ERC20, ReentrancyGuard {
         emit Mint(msg.sender, amount0, amount1);
     }
 
-    function burn(address to) external override returns (uint256 amount0, uint256 amount1) {
+    function burn(address to) external override nonReentrant returns (uint256 amount0, uint256 amount1) {
         (uint112 _reserve0, uint112 _reserve1,) = getReserves();
         address _token0 = token0;
         address _token1 = token1;
@@ -110,7 +110,7 @@ contract UniswapV2Pair is IUniswapV2Pair, UniswapV2ERC20, ReentrancyGuard {
         emit Burn(msg.sender, amount0, amount1, to);
     }
 
-    function swap(uint256 amount0Out, uint256 amount1Out, address to, bytes calldata data) external override {
+    function swap(uint256 amount0Out, uint256 amount1Out, address to, bytes calldata data) external override nonReentrant {
         require(amount0Out > 0 || amount1Out > 0, "UniswapV2: INSUFFICIENT_OUTPUT_AMOUNT");
         (uint112 _reserve0, uint112 _reserve1,) = getReserves();
         require(amount0Out < _reserve0 && amount1Out < _reserve1, "UniswapV2: INSUFFICIENT_LIQUIDITY");
@@ -123,7 +123,7 @@ contract UniswapV2Pair is IUniswapV2Pair, UniswapV2ERC20, ReentrancyGuard {
             require(to != _token0 && to != _token1, "UniswapV2: INVALID_TO");
             if (amount0Out > 0) _safeTransfer(token0, to, amount0Out);
             if (amount1Out > 0) _safeTransfer(token1, to, amount1Out);
-            if (data.length > 0) IUniswapV2Callee(to).uniswapV2Call(msg.sender, amount0Out, amount1Out, data);
+            if (data.length > 0) ISwaplyCallee(to).uniswapV2Call(msg.sender, amount0Out, amount1Out, data);
             balance0 = IERC20(_token0).balanceOf(address(this));
             balance1 = IERC20(_token1).balanceOf(address(this));
         }
@@ -143,14 +143,14 @@ contract UniswapV2Pair is IUniswapV2Pair, UniswapV2ERC20, ReentrancyGuard {
         emit Swap(msg.sender, amount0In, amount1In, amount0Out, amount1Out, to);
     }
 
-    function skim(address to) external override {
+    function skim(address to) external override nonReentrant {
         address _token0 = token0;
         address _token1 = token1;
         _safeTransfer(_token0, to, IERC20(_token0).balanceOf(address(this)) - reserve0);
         _safeTransfer(_token1, to, IERC20(_token1).balanceOf(address(this)) - reserve1);
     }
 
-    function sync() external override {
+    function sync() external override nonReentrant {
         _update(IERC20(token0).balanceOf(address(this)), IERC20(token1).balanceOf(address(this)), reserve0, reserve1);
     }
 
@@ -178,7 +178,7 @@ contract UniswapV2Pair is IUniswapV2Pair, UniswapV2ERC20, ReentrancyGuard {
     }
 
     function _mintFee(uint112 _reserve0, uint112 _reserve1) private returns (bool feeOn) {
-        address feeTo = IUniswapV2Factory(factory).feeTo();
+        address feeTo = ISwaplyFactory(factory).feeTo();
         feeOn = feeTo != address(0);
         uint256 _kLast = kLast;
 

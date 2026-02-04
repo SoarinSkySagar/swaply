@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-interface IUniswapV2Factory {
+interface ISwaplyFactory {
     function feeTo() external view returns (address);
     function feeToSetter() external view returns (address);
 
