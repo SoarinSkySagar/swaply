@@ -1,66 +1,33 @@
-## Foundry
+## Swaply
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+Swaply is a Foundry-based Solidity codebase for an automated market maker (AMM) with a Uniswap V2-like architecture, including factory, pair, and ERC20 components.
 
-Foundry consists of:
+## Prerequisites
 
-- **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
-- **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
-- **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
-- **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+- Foundry installed (`forge`, `cast`, `anvil`)
 
-## Documentation
+## Install dependencies
 
-https://book.getfoundry.sh/
-
-## Usage
-
-### Build
+This project uses Soldeer for dependency management.
 
 ```shell
-$ forge build
+forge soldeer install
 ```
 
-### Test
+## Build
 
 ```shell
-$ forge test
+forge build
 ```
 
-### Format
+## Test
 
 ```shell
-$ forge fmt
+forge test
 ```
 
-### Gas Snapshots
+## Format
 
 ```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
+forge fmt
 ```
